@@ -1,11 +1,13 @@
 import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppLayout } from "./layouts/app-layout";
+import { useAuth } from "./context/auth-context";
 
 const DashboardPage = lazy(() => import("./pages/dashboard-page"));
 const ReportsPage = lazy(() => import("./pages/reports-page"));
 const SettingsPage = lazy(() => import("./pages/settings-page"));
 const NotFoundPage = lazy(() => import("./pages/not-found-page"));
+const AuthPage = lazy(() => import("./pages/auth-page"));
 
 function RouteFallback() {
   return (
@@ -15,11 +17,40 @@ function RouteFallback() {
   );
 }
 
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+  const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#080c14" }}>
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
-        <Route element={<AppLayout />}>
+        {/* Public route */}
+        <Route path="/login" element={<AuthPage />} />
+
+        {/* Protected routes */}
+        <Route
+          element={
+            <RequireAuth>
+              <AppLayout />
+            </RequireAuth>
+          }
+        >
           <Route index element={<DashboardPage />} />
           <Route path="reports" element={<ReportsPage />} />
           <Route path="settings" element={<SettingsPage />} />

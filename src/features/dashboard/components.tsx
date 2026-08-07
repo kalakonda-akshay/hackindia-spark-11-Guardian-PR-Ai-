@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import {
   Activity,
   AlertTriangle,
@@ -114,7 +113,7 @@ export function SecurityGauge({ score }: { score: number }) {
         <div className="relative h-52 w-52">
           <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120" role="img" aria-label={`Security score ${score}`}>
             <circle cx="60" cy="60" r="48" stroke="currentColor" strokeWidth="10" fill="none" className="text-muted" />
-            <motion.circle
+            <circle
               cx="60"
               cy="60"
               r="48"
@@ -123,9 +122,8 @@ export function SecurityGauge({ score }: { score: number }) {
               fill="none"
               strokeLinecap="round"
               strokeDasharray={circumference}
-              initial={{ strokeDashoffset: circumference }}
-              animate={{ strokeDashoffset: offset }}
-              transition={{ duration: 1.1, ease: "easeOut" }}
+              strokeDashoffset={offset}
+              style={{ transition: "stroke-dashoffset 1.1s ease-out" }}
             />
           </svg>
           <div className="absolute inset-0 grid place-items-center text-center">
@@ -253,8 +251,8 @@ export function AgentStatusGrid({ agents }: { agents: Agent[] }) {
         <CardTitle>Agent Status Monitor</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {agents.map((agent) => {
-          const Icon = statusIcon[agent.status];
+        {(agents ?? []).map((agent) => {
+          const Icon = statusIcon[agent.status as keyof typeof statusIcon] ?? Clock3;
           return (
             <article key={agent.name} className="rounded-lg border bg-background p-4">
               <div className="flex items-center justify-between gap-3">
@@ -424,7 +422,7 @@ export function TopVulnerabilities({ categories }: { categories: VulnerabilityCa
         <CardTitle>Top Vulnerabilities</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {categories.map((category, index) => {
+        {(categories ?? []).map((category, index) => {
           const Icon = icons[index % icons.length];
           return (
             <article key={category.name} className="rounded-lg border bg-background p-4">
@@ -452,7 +450,7 @@ export function VulnerabilityFeed({ findings }: { findings: SecurityFinding[] })
       </CardHeader>
       <CardContent>
         <div className="max-h-72 space-y-3 overflow-auto pr-1">
-          {findings.map((finding) => (
+          {(findings ?? []).map((finding) => (
             <article key={finding.id} className="rounded-lg border bg-background p-3">
               <div className="flex items-center justify-between gap-3">
                 <Badge tone={severityTone[finding.severity]}>{finding.severity}</Badge>

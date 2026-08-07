@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { Request, Response } from "express";
 import { env } from "../config/env.js";
+import { orchestratorService } from "../agents/orchestrator/orchestrator.service.js";
 
 /**
  * Handles incoming GitHub webhooks.
@@ -91,9 +92,8 @@ export class WebhookHandler {
       action: payload.action,
     };
 
-    // TODO: Trigger OrchestratorAgent.run(reviewRequest)
-    // import { orchestratorAgent } from "../agents/orchestrator/index.js";
-    // await orchestratorAgent.handleReviewRequest(reviewRequest);
+    // Trigger OrchestratorService
+    await orchestratorService.handleReviewRequest(reviewRequest);
   }
 }
 

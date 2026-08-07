@@ -4,6 +4,7 @@ import { ReviewSession, ReviewStatus } from "../../models/orchestrator.types.js"
 import { messageBus } from "../../services/message-bus.js";
 import { SessionModel } from "../../db/Session.js";
 import { socketService } from "../../services/socket.service.js";
+import { githubService } from "../../github/github.service.js";
 
 /**
  * Orchestrator Service manages the lifecycle of a PR review.
@@ -65,6 +66,20 @@ export class OrchestratorService {
 
       await this.updateStatus(sessionId, "COMPLETED");
       await this.logTransition(sessionId, "COMPLETED", "Workflow completed successfully");
+
+      // Post the final report back to GitHub
+      try {
+        const finalSession = await this.getSession(sessionId);
+        const report = finalSession.contextBundle.reporter;
+        const prUrl = finalSession.reviewRequest.pullRequest.html_url;
+        
+        if (report?.markdownBody && prUrl) {
+          await githubService.postComment(prUrl, report.markdownBody);
+          await this.logTransition(sessionId, "COMPLETED", `Successfully posted review to GitHub PR: ${prUrl}`);
+        }
+      } catch (err: any) {
+        console.error(`[Orchestrator] Failed to post comment to GitHub: ${err.message}`);
+      }
 
     } catch (error: any) {
       await this.updateStatus(sessionId, "FAILED");

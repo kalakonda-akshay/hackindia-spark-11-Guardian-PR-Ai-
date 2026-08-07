@@ -1,9 +1,10 @@
-import { ChevronLeft, Github, ShieldCheck } from "lucide-react";
+import { ChevronLeft, Github, ShieldCheck, LogOut } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { ThemeToggle } from "../theme-toggle";
 import { Button } from "../ui/button";
 import { navigationItems } from "../../constants/navigation";
 import { cn } from "../../utils/cn";
+import { useAuth } from "../../context/auth-context";
 
 type SidebarProps = {
   collapsed: boolean;
@@ -11,6 +12,8 @@ type SidebarProps = {
 };
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const { user, logout } = useAuth();
+
   return (
     <aside
       className={cn(
@@ -70,14 +73,26 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <ThemeToggle />
         </div>
         <div className={cn("flex items-center gap-3 rounded-lg bg-muted/70 p-3", collapsed && "justify-center p-2")}>
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-background text-foreground">
-            <Github className="h-4 w-4" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary font-semibold text-sm">
+            {user?.name?.charAt(0).toUpperCase() || <Github className="h-4 w-4" />}
           </div>
           {!collapsed && (
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">Hack India Team</p>
-              <p className="truncate text-xs text-muted-foreground">admin@prsentry.ai</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">{user?.name || "Guest"}</p>
+              <p className="truncate text-xs text-muted-foreground">{user?.email || ""}</p>
             </div>
+          )}
+          {!collapsed && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={logout}
+              title="Sign out"
+              aria-label="Sign out"
+              className="h-8 w-8 shrink-0"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </Button>
           )}
         </div>
       </div>

@@ -10,9 +10,24 @@ const app = express();
 geminiService.initialize();
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({
+  verify: (req: any, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 
 import { githubService } from '../github/github.service.js';
+import { webhookHandler } from '../github/webhook.handler.js';
+import { authRouter } from './auth.routes.js';
+
+// Auth endpoints (register, login, me)
+app.use('/api/auth', authRouter);
+
+// Webhook endpoint
+app.post('/api/webhook', 
+  (req, res, next) => webhookHandler.verifySignature(req, res, next),
+  (req, res) => webhookHandler.handleEvent(req, res)
+);
 
 // Boot all agents so they subscribe to the message bus
 import '../agents/triage/triage.agent.js';
@@ -202,7 +217,7 @@ function getStageStatus(stagePhase: string, currentStatus: string) {
   if (currentStatus === "FAILED") return "failed";
   if (currentIdx > stageIdx) return "completed";
   if (currentIdx === stageIdx) return "running";
-  return "pending";
+  return "waiting"; // Use 'waiting' not 'pending' to match frontend AgentStatusGrid map
 }
 
 /**

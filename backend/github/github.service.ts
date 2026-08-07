@@ -123,6 +123,25 @@ diff --git a/src/auth.ts b/src/auth.ts
       } as unknown as ReviewRequest;
     }
   }
+
+  /**
+   * Posts a comment to a specific PR.
+   */
+  public async postComment(url: string, body: string): Promise<void> {
+    const { owner, repo, prNumber } = this.parseUrl(url);
+
+    try {
+      await this.octokit.rest.issues.createComment({
+        owner,
+        repo,
+        issue_number: prNumber,
+        body,
+      });
+      console.log(`[GitHubService] Successfully posted comment to PR #${prNumber}`);
+    } catch (error: any) {
+      console.warn(`[GitHubService] Failed to post comment to PR #${prNumber}. Error: ${error.message}`);
+    }
+  }
 }
 
 export const githubService = new GitHubService();
