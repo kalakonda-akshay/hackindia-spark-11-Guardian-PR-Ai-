@@ -3,7 +3,8 @@ import { useEffect } from "react";
 import { getDashboard } from "../services/dashboard";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3001");
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+const socket = io(API_URL);
 
 export function useDashboard() {
   const queryClient = useQueryClient();

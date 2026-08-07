@@ -31,7 +31,8 @@ export default function DashboardPage() {
     if (!prUrl) return;
     setIsScanning(true);
     try {
-      const res = await fetch("http://localhost:3001/api/analyze", {
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+      const res = await fetch(`${apiUrl}/api/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: prUrl })
