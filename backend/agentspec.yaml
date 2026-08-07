@@ -1,0 +1,333 @@
+schema_version: "agentspec.mutagent.io/v0.3.0"
+system:
+  name: "GitHub PR Security & Code Review Agent"
+  goal: "Analyze GitHub pull requests with modular specialist agents and produce a high-confidence review comment."
+  description: "A production-quality multi-agent review system designed for security, dependency, memory, and quality evaluation."
+  domain: "GitHub PR review"
+
+lifecycle_support:
+  mutagent:
+    spec: true
+    build: true
+    evaluate: true
+    diagnose: true
+    optimize: true
+
+workflow:
+  trigger: "GitHub PR event"
+  order:
+    - "Orchestrator"
+    - "Triage"
+    - "Context"
+    - "Security"
+    - "Dependency Intelligence"
+    - "Review Memory"
+    - "Reporter"
+    - "Evaluation"
+    - "GitHub Comment"
+  notes:
+    - "Triage always precedes context expansion."
+    - "Context is the shared evidence source for specialist analysis."
+    - "Reporter produces the developer-facing review artifact."
+    - "Evaluation gates the final output and feeds diagnose/optimize."
+
+communication:
+  model: "handoff-based"
+  principles:
+    - "Each agent receives only the inputs needed for its job."
+    - "Every finding must retain an evidence trail."
+    - "Conflicts are surfaced, not hidden."
+    - "Failures are explicit and resumable."
+  channels:
+    - from: "GitHub PR"
+      to: "Orchestrator"
+      payload: ["PR metadata", "diff summary", "repo identifier"]
+    - from: "Orchestrator"
+      to: "Triage"
+      payload: ["review request", "PR metadata"]
+    - from: "Triage"
+      to: "Context"
+      payload: ["risk classification", "file focus hints"]
+    - from: "Context"
+      to: "Security"
+      payload: ["evidence bundle"]
+    - from: "Context"
+      to: "Dependency Intelligence"
+      payload: ["dependency-relevant evidence"]
+    - from: "Context"
+      to: "Review Memory"
+      payload: ["code paths", "review scope"]
+    - from: "Security"
+      to: "Reporter"
+      payload: ["security findings"]
+    - from: "Dependency Intelligence"
+      to: "Reporter"
+      payload: ["dependency findings"]
+    - from: "Review Memory"
+      to: "Reporter"
+      payload: ["historical signals"]
+    - from: "Reporter"
+      to: "Evaluation"
+      payload: ["final review artifact"]
+    - from: "Evaluation"
+      to: "GitHub Comment"
+      payload: ["verdict", "publishable review"]
+
+agents:
+  - id: orchestrator
+    name: Orchestrator
+    type: coordinator
+    path:
+      directory: "backend/agents/orchestrator"
+      readme: "backend/agents/orchestrator/README.md"
+      agent_doc: "backend/agents/orchestrator/agent.md"
+      prompt_spec: "backend/agents/orchestrator/prompt-spec.md"
+    inputs:
+      - "GitHub PR metadata"
+      - "review request"
+      - "prior agent outputs"
+    outputs:
+      - "workflow plan"
+      - "routing decisions"
+      - "status summary"
+    responsibilities:
+      - "Coordinate the entire review flow."
+      - "Preserve agent ordering."
+      - "Escalate missing context."
+    success_criteria:
+      - "All specialist agents are invoked correctly."
+      - "The workflow is resumable after partial failure."
+    failure_handling:
+      - "Stop on missing PR metadata."
+      - "Record and route specialist failures."
+    evaluation_metrics:
+      - "handoff correctness"
+      - "workflow completeness"
+      - "failure recovery"
+
+  - id: triage
+    name: Triage
+    type: classifier
+    path:
+      directory: "backend/agents/triage"
+      readme: "backend/agents/triage/README.md"
+      agent_doc: "backend/agents/triage/agent.md"
+      prompt_spec: "backend/agents/triage/prompt-spec.md"
+    inputs:
+      - "PR diff summary"
+      - "file list"
+      - "commit metadata"
+    outputs:
+      - "risk level"
+      - "change type"
+      - "routing hints"
+    responsibilities:
+      - "Classify the PR."
+      - "Identify high-risk areas."
+    success_criteria:
+      - "Risk is correctly estimated."
+      - "Routing is clear."
+    failure_handling:
+      - "Mark uncertainty explicitly."
+    evaluation_metrics:
+      - "routing precision"
+      - "risk recall"
+
+  - id: context
+    name: Context
+    type: evidence-assembler
+    path:
+      directory: "backend/agents/context"
+      readme: "backend/agents/context/README.md"
+      agent_doc: "backend/agents/context/agent.md"
+      prompt_spec: "backend/agents/context/prompt-spec.md"
+    inputs:
+      - "triage summary"
+      - "diff hunks"
+      - "repository structure"
+    outputs:
+      - "context bundle"
+      - "missing-context list"
+    responsibilities:
+      - "Assemble evidence around changed code."
+      - "Keep the evidence focused."
+    success_criteria:
+      - "Specialists receive enough context."
+    failure_handling:
+      - "Request missing repository details."
+    evaluation_metrics:
+      - "coverage"
+      - "traceability"
+
+  - id: security
+    name: Security
+    type: specialist-reviewer
+    path:
+      directory: "backend/agents/security"
+      readme: "backend/agents/security/README.md"
+      agent_doc: "backend/agents/security/agent.md"
+      prompt_spec: "backend/agents/security/prompt-spec.md"
+    inputs:
+      - "context bundle"
+      - "diff hunks"
+      - "triage signals"
+    outputs:
+      - "security findings"
+      - "severity ratings"
+    responsibilities:
+      - "Detect vulnerabilities."
+      - "Prioritize evidence-backed issues."
+    success_criteria:
+      - "True vulnerabilities are identified."
+    failure_handling:
+      - "Mark findings tentative when evidence is incomplete."
+    evaluation_metrics:
+      - "vulnerability recall"
+      - "false-positive rate"
+
+  - id: dependency-intelligence
+    name: Dependency Intelligence
+    type: specialist-reviewer
+    path:
+      directory: "backend/agents/dependency"
+      readme: "backend/agents/dependency/README.md"
+      agent_doc: "backend/agents/dependency/agent.md"
+      prompt_spec: "backend/agents/dependency/prompt-spec.md"
+    inputs:
+      - "manifest diffs"
+      - "lockfile diffs"
+      - "context bundle"
+    outputs:
+      - "dependency risk summary"
+      - "compatibility concerns"
+    responsibilities:
+      - "Review dependency changes and supply-chain risk."
+    success_criteria:
+      - "Risky dependency changes are surfaced."
+    failure_handling:
+      - "State when package metadata is unavailable."
+    evaluation_metrics:
+      - "suspicious-package recall"
+      - "compatibility accuracy"
+
+  - id: review-memory
+    name: Review Memory
+    type: memory-augmenter
+    path:
+      directory: "backend/agents/review-memory"
+      readme: "backend/agents/review-memory/README.md"
+      agent_doc: "backend/agents/review-memory/agent.md"
+      prompt_spec: "backend/agents/review-memory/prompt-spec.md"
+    inputs:
+      - "context bundle"
+      - "review history"
+      - "known conventions"
+    outputs:
+      - "memory summary"
+      - "recurring-pattern signals"
+    responsibilities:
+      - "Retrieve relevant prior review knowledge."
+    success_criteria:
+      - "Repeated issues are recognized."
+    failure_handling:
+      - "Treat memory as advisory if ambiguous."
+    evaluation_metrics:
+      - "memory relevance"
+      - "staleness detection"
+
+  - id: reporter
+    name: Reporter
+    type: synthesizer
+    path:
+      directory: "backend/agents/reporter"
+      readme: "backend/agents/reporter/README.md"
+      agent_doc: "backend/agents/reporter/agent.md"
+      prompt_spec: "backend/agents/reporter/prompt-spec.md"
+    inputs:
+      - "security findings"
+      - "dependency findings"
+      - "memory notes"
+      - "context bundle"
+    outputs:
+      - "developer-facing review comment"
+      - "follow-up checklist"
+    responsibilities:
+      - "Merge findings into a concise report."
+      - "Preserve evidence and severity."
+    success_criteria:
+      - "The output is clear and actionable."
+    failure_handling:
+      - "Expose conflicts instead of hiding them."
+    evaluation_metrics:
+      - "readability"
+      - "actionability"
+
+  - id: evaluation
+    name: Evaluation
+    type: judge
+    path:
+      directory: "backend/agents/evaluation"
+      readme: "backend/agents/evaluation/README.md"
+      agent_doc: "backend/agents/evaluation/agent.md"
+      prompt_spec: "backend/agents/evaluation/prompt-spec.md"
+    inputs:
+      - "reporter output"
+      - "specialist outputs"
+      - "workflow trace"
+    outputs:
+      - "verdict"
+      - "quality gaps"
+      - "optimization signals"
+    responsibilities:
+      - "Judge the review output quality."
+      - "Emit diagnose/optimize signals."
+    success_criteria:
+      - "Pass/fail is explicit and well-supported."
+    failure_handling:
+      - "Fail explicitly when review coverage is incomplete."
+    evaluation_metrics:
+      - "coverage completeness"
+      - "decision consistency"
+      - "optimization value"
+
+evaluation_strategy:
+  philosophy: "binary-first with evidence"
+  stages:
+    - "Check workflow completeness."
+    - "Check evidence quality."
+    - "Check specialist coverage."
+    - "Check report actionability."
+  gates:
+    pass_conditions:
+      - "All required specialist outputs are present."
+      - "Findings are evidence-backed."
+      - "Reporter output is developer-ready."
+    fail_conditions:
+      - "Missing required evidence."
+      - "Inconsistent or unsupported verdict."
+      - "Incomplete specialist coverage."
+
+optimization_strategy:
+  philosophy: "diagnose before optimize"
+  signals:
+    - "false negatives"
+    - "false positives"
+    - "handoff breaks"
+    - "missing context"
+    - "weak evidence"
+  loop:
+    - "Evaluate current output."
+    - "Diagnose failure modes."
+    - "Update prompt boundaries or routing."
+    - "Re-run with the same architecture."
+  guardrails:
+    - "Do not collapse specialist roles."
+    - "Do not add business logic to the agentspec."
+    - "Keep fixes modular and reviewable."
+
+artifacts:
+  root: "backend"
+  agents_dir: "backend/agents"
+  prompts_dir: "backend/prompts"
+  traces_dir: "backend/traces"
+

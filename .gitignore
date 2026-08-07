@@ -1,0 +1,14 @@
+node_modules/
+dist/
+work/
+.vite/
+.env
+.env.local
+*.log
+*.tsbuildinfo
+Thumbs.db
+.DS_Store
+backend/node_modules/
+backend/dist/
+backend/.env
+backend/.env.local

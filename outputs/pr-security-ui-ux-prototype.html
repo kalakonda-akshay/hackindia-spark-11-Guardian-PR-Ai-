@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PR Sentinel UI/UX Prototype</title>
+    <style>
+      :root {
+        --bg: #070b14;
+        --surface: #0d1323;
+        --surface-2: #111a2e;
+        --line: #22304a;
+        --muted: #93a4bd;
+        --text: #edf5ff;
+        --cyan: #22d3ee;
+        --green: #34d399;
+        --amber: #fbbf24;
+        --red: #fb7185;
+        --blue: #8ab4ff;
+        --shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 15% -10%, rgba(34, 211, 238, 0.18), transparent 32rem),
+          radial-gradient(circle at 90% 0%, rgba(52, 211, 153, 0.12), transparent 28rem),
+          var(--bg);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      button, input, select { font: inherit; }
+      .app { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: 100vh; }
+      .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        border-right: 1px solid var(--line);
+        background: rgba(11, 17, 31, 0.86);
+        backdrop-filter: blur(18px);
+        padding: 18px;
+      }
+      .brand { display: flex; align-items: center; gap: 12px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+      .mark {
+        width: 42px; height: 42px; border-radius: 10px;
+        display: grid; place-items: center;
+        color: var(--cyan);
+        background: rgba(34, 211, 238, 0.12);
+        border: 1px solid rgba(34, 211, 238, 0.28);
+      }
+      .brand h1 { margin: 0; font-size: 15px; }
+      .brand p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+      .nav { display: grid; gap: 8px; margin-top: 22px; }
+      .nav button {
+        height: 44px; border: 0; border-radius: 8px; padding: 0 12px;
+        display: flex; align-items: center; gap: 10px;
+        color: var(--muted); background: transparent; cursor: pointer;
+      }
+      .nav button.active, .nav button:hover { color: var(--cyan); background: rgba(34, 211, 238, 0.1); }
+      .profile {
+        position: absolute; left: 18px; right: 18px; bottom: 18px;
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px; border: 1px solid var(--line); border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .avatar {
+        width: 36px; height: 36px; border-radius: 8px;
+        display: grid; place-items: center; font-weight: 800;
+        color: #051018; background: linear-gradient(135deg, var(--cyan), var(--green));
+      }
+      .profile strong { display: block; font-size: 13px; }
+      .profile span { color: var(--muted); font-size: 12px; }
+
+      .main { min-width: 0; }
+      .topbar {
+        position: sticky; top: 0; z-index: 10;
+        display: flex; align-items: center; gap: 12px;
+        height: 66px; padding: 0 26px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(7, 11, 20, 0.78);
+        backdrop-filter: blur(18px);
+      }
+      .search { flex: 1; position: relative; }
+      .search input {
+        width: 100%; height: 40px; border: 1px solid var(--line); border-radius: 8px;
+        background: rgba(255, 255, 255, 0.035); color: var(--text); padding: 0 14px 0 38px;
+      }
+      .search span { position: absolute; left: 13px; top: 9px; color: var(--muted); }
+      select, .icon-btn, .btn {
+        height: 40px; border: 1px solid var(--line); border-radius: 8px;
+        background: var(--surface); color: var(--text); padding: 0 12px;
+      }
+      .icon-btn { width: 40px; padding: 0; cursor: pointer; }
+      .btn { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+      .btn.primary { background: linear-gradient(135deg, #0891b2, #10b981); border: 0; color: #041018; font-weight: 800; }
+
+      .content { padding: 26px; }
+      .view { display: none; }
+      .view.active { display: block; }
+      .hero { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin-bottom: 22px; }
+      .eyebrow { color: var(--cyan); font-size: 13px; font-weight: 800; margin: 0 0 6px; }
+      h2 { margin: 0; font-size: clamp(28px, 4vw, 40px); letter-spacing: 0; }
+      .sub { max-width: 760px; color: var(--muted); line-height: 1.6; margin: 10px 0 0; }
+      .pill {
+        display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+        border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+        color: var(--muted); background: rgba(255, 255, 255, 0.035);
+      }
+      .pill strong { color: var(--text); }
+
+      .grid { display: grid; gap: 16px; }
+      .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .two { grid-template-columns: 360px minmax(0, 1fr); }
+      .split { grid-template-columns: 1.15fr 0.85fr; }
+      .cards-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .cards-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: linear-gradient(180deg, rgba(17, 26, 46, 0.94), rgba(10, 15, 28, 0.94));
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .card-h {
+        min-height: 58px; padding: 16px 18px;
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        border-bottom: 1px solid rgba(34, 48, 74, 0.72);
+      }
+      .card-h h3 { margin: 0; font-size: 15px; }
+      .card-c { padding: 18px; }
+      .metric { padding: 18px; }
+      .metric small { color: var(--muted); text-transform: uppercase; font-weight: 800; font-size: 11px; }
+      .metric strong { display: block; margin-top: 10px; font-size: 28px; }
+      .metric p { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+      .badge {
+        display: inline-flex; align-items: center; border-radius: 7px; border: 1px solid var(--line);
+        padding: 4px 8px; font-size: 12px; font-weight: 800; text-transform: capitalize;
+      }
+      .critical { color: var(--red); background: rgba(251, 113, 133, 0.11); border-color: rgba(251, 113, 133, 0.24); }
+      .high { color: var(--amber); background: rgba(251, 191, 36, 0.11); border-color: rgba(251, 191, 36, 0.24); }
+      .medium { color: var(--cyan); background: rgba(34, 211, 238, 0.11); border-color: rgba(34, 211, 238, 0.24); }
+      .low, .good { color: var(--green); background: rgba(52, 211, 153, 0.11); border-color: rgba(52, 211, 153, 0.24); }
+
+      .gauge { width: 220px; height: 220px; margin: 8px auto; position: relative; display: grid; place-items: center; }
+      .gauge svg { width: 220px; height: 220px; transform: rotate(-90deg); }
+      .gauge .num { position: absolute; text-align: center; }
+      .gauge .num strong { font-size: 54px; }
+      .gauge .num span { display: block; color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th { text-align: left; color: var(--muted); font-size: 11px; text-transform: uppercase; padding: 12px; border-bottom: 1px solid var(--line); }
+      td { padding: 13px 12px; border-bottom: 1px solid rgba(34, 48, 74, 0.62); color: #dbeafe; }
+      tr:hover td { background: rgba(34, 211, 238, 0.055); cursor: pointer; }
+      .bar { width: 94px; height: 8px; background: rgba(255,255,255,.08); border-radius: 99px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+      .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); border-radius: inherit; }
+
+      .pipeline { grid-template-columns: repeat(7, minmax(110px, 1fr)); }
+      .stage { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: rgba(255,255,255,.03); }
+      .stage b { display: block; margin-top: 16px; font-size: 13px; }
+      .stage span { color: var(--muted); font-size: 12px; }
+      .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 0 6px rgba(34,211,238,.1); }
+
+      .timeline { max-height: 330px; overflow: auto; display: grid; gap: 10px; }
+      .event { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: rgba(255,255,255,.03); }
+      .event small { color: var(--muted); font-weight: 800; }
+      .event p { margin: 8px 0 0; font-size: 13px; line-height: 1.45; }
+
+      .chart { height: 260px; padding: 8px 0 0; }
+      .chart svg { width: 100%; height: 100%; }
+      .heat { display: grid; gap: 9px; min-width: 540px; }
+      .heat-row { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: 8px; }
+      .heat-row span { border: 1px solid var(--line); border-radius: 8px; padding: 9px; text-align: center; font-size: 13px; background: rgba(255,255,255,.03); }
+      .heat-row .repo { text-align: left; font-weight: 800; }
+
+      .vuln { border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: rgba(255,255,255,.03); }
+      .vuln b { display: block; margin-top: 18px; }
+      .vuln p { color: var(--muted); line-height: 1.45; font-size: 13px; margin: 7px 0 0; }
+
+      .summary { font-size: 18px; line-height: 1.7; color: #e5f3ff; }
+      .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+      .actions div { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: rgba(255,255,255,.03); font-weight: 800; font-size: 13px; }
+
+      .filters { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      label span { display: block; color: var(--muted); font-size: 12px; font-weight: 800; margin-bottom: 6px; }
+      .field { width: 100%; height: 40px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.035); color: var(--text); padding: 0 10px; }
+      .detail-section { border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.03); padding: 14px; margin-top: 12px; }
+      .detail-section h4 { margin: 0 0 10px; }
+      .detail-section p { margin: 8px 0; color: var(--muted); font-size: 13px; line-height: 1.5; background: rgba(255,255,255,.035); padding: 9px; border-radius: 7px; }
+
+      .drawer, .notify {
+        position: fixed; inset: 0; z-index: 30; display: none;
+        background: rgba(2, 6, 23, 0.62); backdrop-filter: blur(8px);
+      }
+      .drawer.open, .notify.open { display: block; }
+      .panel {
+        position: absolute; right: 0; top: 0; width: min(680px, 100%); height: 100%;
+        overflow: auto; border-left: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow);
+      }
+      .panel.small { width: min(420px, 100%); }
+      .panel-head { position: sticky; top: 0; background: rgba(13,19,35,.96); border-bottom: 1px solid var(--line); padding: 18px; display: flex; justify-content: space-between; gap: 12px; }
+      .panel-body { padding: 18px; }
+      .close { border: 1px solid var(--line); background: transparent; color: var(--text); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; }
+
+      @media (max-width: 1180px) {
+        .app { grid-template-columns: 1fr; }
+        .sidebar { position: relative; height: auto; }
+        .profile { position: static; margin-top: 20px; }
+        .metrics, .cards-4 { grid-template-columns: repeat(2, 1fr); }
+        .two, .split { grid-template-columns: 1fr; }
+        .pipeline { grid-template-columns: repeat(2, 1fr); }
+        .filters { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 720px) {
+        .topbar { flex-wrap: wrap; height: auto; padding: 12px; }
+        .hero { align-items: start; flex-direction: column; }
+        .metrics, .cards-3, .cards-4, .filters, .pipeline, .actions { grid-template-columns: 1fr; }
+        .content { padding: 16px; }
+        .sidebar { padding: 14px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="mark">SH</div>
+          <div><h1>PR Sentinel</h1><p>GitHub security review agent</p></div>
+        </div>
+        <nav class="nav">
+          <button class="active" data-view-button="dashboard">Dashboard</button>
+          <button data-view-button="reports">Reports</button>
+          <button data-view-button="settings">Settings</button>
+        </nav>
+        <div class="profile"><div class="avatar">HI</div><div><strong>Hack India Team</strong><span>admin@prsentry.ai</span></div></div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="search"><span>⌕</span><input value="" placeholder="Search PRs, repositories, findings" /></div>
+          <select><option>fintech-core</option><option>identity-gateway</option><option>payments-api</option></select>
+          <select><option>main</option><option>release/2026.08</option></select>
+          <select><option>#482 Harden token exchange</option><option>#477 Upgrade auth middleware</option></select>
+          <button class="icon-btn" onclick="toggleNotify()">●</button>
+          <div class="avatar">HI</div>
+        </header>
+
+        <section class="content view active" id="dashboard">
+          <div class="hero">
+            <div><p class="eyebrow">Dashboard</p><h2>Security review command center</h2><p class="sub">Live pull request intelligence, agent pipeline health, repository risk posture, and executive-ready remediation guidance for security-sensitive engineering teams.</p></div>
+            <div class="pill">Active scan: <strong>fintech-core #482</strong></div>
+          </div>
+
+          <div class="grid metrics">
+            <div class="card metric"><small>Total PRs</small><strong>184</strong><p>+18 this week</p></div>
+            <div class="card metric"><small>Reviewed PRs</small><strong>142</strong><p>77% automated coverage</p></div>
+            <div class="card metric"><small>Pending Reviews</small><strong>23</strong><p>6 waiting for context</p></div>
+            <div class="card metric"><small>Critical Issues</small><strong style="color:var(--red)">4</strong><p>-2 since yesterday</p></div>
+            <div class="card metric"><small>High Issues</small><strong style="color:var(--amber)">17</strong><p>+5 in auth services</p></div>
+            <div class="card metric"><small>Medium Issues</small><strong style="color:var(--cyan)">39</strong><p>mostly dependency drift</p></div>
+            <div class="card metric"><small>Low Issues</small><strong style="color:var(--green)">61</strong><p>triaged automatically</p></div>
+            <div class="card metric"><small>AI Confidence</small><strong>94%</strong><p>7-agent consensus</p></div>
+          </div>
+
+          <div class="grid two" style="margin-top:16px">
+            <div class="card">
+              <div class="card-h"><h3>Security Score</h3><span class="badge good">Live</span></div>
+              <div class="card-c">
+                <div class="gauge">
+                  <svg viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="48" stroke="#1d2b44" stroke-width="10" fill="none"/>
+                    <circle cx="60" cy="60" r="48" stroke="#34d399" stroke-width="10" stroke-linecap="round" fill="none" stroke-dasharray="301" stroke-dashoffset="36"/>
+                  </svg>
+                  <div class="num"><strong>88</strong><span>Posture score</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="card">
+                <div class="card-h"><h3>Recent Pull Requests</h3><span class="badge medium">4 active</span></div>
+                <div style="overflow:auto">
+                  <table>
+                    <thead><tr><th>Repository</th><th>PR</th><th>Author</th><th>Status</th><th>Risk</th><th>Score</th><th>Updated</th></tr></thead>
+                    <tbody>
+                      <tr onclick="openDrawer()"><td>fintech-core</td><td>#482 Harden token exchange</td><td>Aarav Mehta</td><td><span class="badge medium">reviewing</span></td><td><span class="badge critical">critical</span></td><td><span class="bar"><i style="width:62%"></i></span>62</td><td>3 min ago</td></tr>
+                      <tr onclick="openDrawer()"><td>identity-gateway</td><td>#477 Upgrade auth middleware</td><td>Nisha Rao</td><td><span class="badge critical">blocked</span></td><td><span class="badge high">high</span></td><td><span class="bar"><i style="width:71%"></i></span>71</td><td>12 min ago</td></tr>
+                      <tr onclick="openDrawer()"><td>payments-api</td><td>#463 Webhook reconciliation</td><td>Kabir Singh</td><td><span class="badge good">approved</span></td><td><span class="badge medium">medium</span></td><td><span class="bar"><i style="width:86%"></i></span>86</td><td>28 min ago</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-h"><h3>Live PR Review Progress</h3><span class="badge medium">#482</span></div>
+                <div class="card-c grid pipeline">
+                  <div class="stage"><div class="dot"></div><b>Triage</b><span>Completed</span></div>
+                  <div class="stage"><div class="dot"></div><b>Context</b><span>Completed</span></div>
+                  <div class="stage"><div class="dot"></div><b>Security</b><span>Analyzing</span></div>
+                  <div class="stage"><div class="dot"></div><b>Dependency</b><span>Completed</span></div>
+                  <div class="stage"><div class="dot"></div><b>Quality</b><span>Queued</span></div>
+                  <div class="stage"><div class="dot"></div><b>Memory</b><span>Completed</span></div>
+                  <div class="stage"><div class="dot"></div><b>Reporter</b><span>Queued</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid split" style="margin-top:16px">
+            <div class="card">
+              <div class="card-h"><h3>Agent Status Monitor</h3></div>
+              <div class="card-c grid cards-4">
+                <div class="vuln"><span class="badge medium">running</span><b>Orchestrator</b><p>Workload 82% · 1.2s latency</p></div>
+                <div class="vuln"><span class="badge good">completed</span><b>Triage</b><p>Workload 34% · 420ms latency</p></div>
+                <div class="vuln"><span class="badge medium">running</span><b>Security</b><p>Workload 91% · 2.8s latency</p></div>
+                <div class="vuln"><span class="badge high">waiting</span><b>Reporter</b><p>Queued for executive summary</p></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>Real-Time Agent Timeline</h3><span class="badge good">live</span></div>
+              <div class="card-c timeline">
+                <div class="event"><small>14:12:08 · Security</small><p>Detected OAuth error reflection in #482.</p></div>
+                <div class="event"><small>14:11:39 · Memory</small><p>Matched prior tenant metadata leak pattern.</p></div>
+                <div class="event"><small>14:10:21 · Dependency</small><p>Flagged jose advisory for manual review.</p></div>
+                <div class="event"><small>14:09:44 · Triage</small><p>Raised #477 to high business impact.</p></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid split" style="margin-top:16px">
+            <div class="card">
+              <div class="card-h"><h3>Security Trend</h3><span class="badge medium">7 days</span></div>
+              <div class="card-c chart">
+                <svg viewBox="0 0 700 240" preserveAspectRatio="none">
+                  <path d="M0 210 L700 210 M0 160 L700 160 M0 110 L700 110 M0 60 L700 60" stroke="#1d2b44" />
+                  <path d="M20 155 C100 120 120 140 190 125 C280 105 300 120 380 85 C470 55 520 78 680 44" fill="none" stroke="#22d3ee" stroke-width="4" />
+                  <path d="M20 85 C130 92 190 100 260 88 C360 82 470 75 680 65" fill="none" stroke="#fbbf24" stroke-width="3" opacity=".8" />
+                  <path d="M20 45 C190 52 320 49 460 45 C560 42 610 39 680 32" fill="none" stroke="#fb7185" stroke-width="3" opacity=".8" />
+                </svg>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>Issue Distribution</h3></div>
+              <div class="card-c" style="display:grid;place-items:center;min-height:260px">
+                <svg width="210" height="210" viewBox="0 0 42 42">
+                  <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="#fb7185" stroke-width="7" stroke-dasharray="8 92" stroke-dashoffset="25"></circle>
+                  <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="#fbbf24" stroke-width="7" stroke-dasharray="24 76" stroke-dashoffset="17"></circle>
+                  <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="#22d3ee" stroke-width="7" stroke-dasharray="32 68" stroke-dashoffset="-7"></circle>
+                  <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="#34d399" stroke-width="7" stroke-dasharray="36 64" stroke-dashoffset="-39"></circle>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid split" style="margin-top:16px">
+            <div class="card">
+              <div class="card-h"><h3>Severity Heatmap</h3></div>
+              <div class="card-c" style="overflow:auto">
+                <div class="heat">
+                  <div class="heat-row"><span class="repo">Repository</span><span>Critical</span><span>High</span><span>Medium</span><span>Low</span></div>
+                  <div class="heat-row"><span class="repo">fintech-core</span><span class="critical">2</span><span class="high">7</span><span class="medium">12</span><span class="low">18</span></div>
+                  <div class="heat-row"><span class="repo">identity-gateway</span><span class="critical">1</span><span class="high">5</span><span class="medium">8</span><span class="low">10</span></div>
+                  <div class="heat-row"><span class="repo">payments-api</span><span>0</span><span class="high">2</span><span class="medium">7</span><span class="low">14</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>Recent Vulnerability Feed</h3></div>
+              <div class="card-c timeline">
+                <div class="event"><span class="badge critical">critical</span><p>Provider error body returned to client · fintech-core</p></div>
+                <div class="event"><span class="badge high">high</span><p>Role fallback permits stale tenant grants · identity-gateway</p></div>
+                <div class="event"><span class="badge medium">medium</span><p>Webhook replay window needs observability · payments-api</p></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div class="card-h"><h3>Top Vulnerabilities</h3></div>
+            <div class="card-c grid cards-3">
+              <div class="vuln"><span class="badge critical">3</span><b>SQL Injection</b><p>Unsafe query construction in report filters.</p></div>
+              <div class="vuln"><span class="badge high">6</span><b>Secrets</b><p>Provider tokens and credentials exposed in diffs.</p></div>
+              <div class="vuln"><span class="badge high">5</span><b>XSS</b><p>Unescaped markdown preview paths.</p></div>
+              <div class="vuln"><span class="badge medium">14</span><b>Unsafe Dependency</b><p>Advisories requiring owner review.</p></div>
+              <div class="vuln"><span class="badge high">8</span><b>Authentication</b><p>Token lifetime and replay risk.</p></div>
+              <div class="vuln"><span class="badge critical">4</span><b>Broken Access Control</b><p>Tenant isolation and stale grants.</p></div>
+            </div>
+          </div>
+
+          <div class="grid split" style="margin-top:16px">
+            <div class="card">
+              <div class="card-h"><h3>Executive AI Summary</h3><span class="badge medium">backend ready</span></div>
+              <div class="card-c">
+                <p class="summary">The portfolio is trending healthier overall, but merge risk is concentrated in authentication-sensitive pull requests. Block #482 until upstream OAuth errors are normalized and #477 until degraded role-cache behavior fails closed.</p>
+                <div class="actions"><div>Block critical auth PRs</div><div>Patch jose advisory</div><div>Add replay telemetry</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>Repository Health</h3></div>
+              <div class="card-c grid">
+                <div class="event"><small>fintech-core</small><p>Score 74 · 12 open PRs · 2 critical issues</p></div>
+                <div class="event"><small>identity-gateway</small><p>Score 79 · 7 open PRs · 1 critical issue</p></div>
+                <div class="event"><small>payments-api</small><p>Score 88 · 5 open PRs · 0 critical issues</p></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="content view" id="reports">
+          <div class="hero">
+            <div><p class="eyebrow">Reports</p><h2>Enterprise security reports</h2><p class="sub">Filterable review evidence, expandable findings, attack simulations, recommendations, and export-ready report states.</p></div>
+            <div class="pill">Evidence retention: <strong>365 days</strong></div>
+          </div>
+          <div class="card">
+            <div class="card-h"><h3>Filters</h3><button class="btn">Reset</button></div>
+            <div class="card-c grid filters">
+              <label><span>Repository</span><select class="field"><option>All repositories</option></select></label>
+              <label><span>Date Range</span><select class="field"><option>Last 30 days</option></select></label>
+              <label><span>Severity</span><select class="field"><option>All severities</option></select></label>
+              <label><span>Author</span><select class="field"><option>All authors</option></select></label>
+              <label><span>Status</span><select class="field"><option>All statuses</option></select></label>
+              <label><span>Search</span><input class="field" placeholder="Report, PR, repo" /></label>
+            </div>
+          </div>
+          <div class="grid split" style="margin-top:16px">
+            <div class="card">
+              <div class="card-h"><h3>Report Table</h3><span class="badge medium">4 reports</span></div>
+              <div style="overflow:auto">
+                <table>
+                  <thead><tr><th>Report</th><th>Repository</th><th>PR</th><th>Severity</th><th>Status</th><th>Score</th></tr></thead>
+                  <tbody>
+                    <tr><td>RPT-2026-0814<br><small>Harden token exchange flow</small></td><td>fintech-core</td><td>#482</td><td><span class="badge critical">critical</span></td><td><span class="badge critical">blocked</span></td><td>62</td></tr>
+                    <tr><td>RPT-2026-0809<br><small>Upgrade auth middleware</small></td><td>identity-gateway</td><td>#477</td><td><span class="badge high">high</span></td><td><span class="badge critical">blocked</span></td><td>71</td></tr>
+                    <tr><td>RPT-2026-0798<br><small>Webhook reconciliation</small></td><td>payments-api</td><td>#463</td><td><span class="badge medium">medium</span></td><td><span class="badge good">approved</span></td><td>86</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>Detailed Report</h3><div><button class="btn">PDF</button> <button class="btn">CSV</button> <button class="btn">JSON</button></div></div>
+              <div class="card-c">
+                <span class="badge critical">critical</span> <span class="badge critical">blocked</span>
+                <div class="detail-section"><h4>Executive Summary</h4><p>OAuth token exchange improvements are directionally correct, but upstream error reflection can expose tenant metadata and should block merge until normalized.</p></div>
+                <div class="detail-section"><h4>Security Findings</h4><p>Provider diagnostic body reflected in API response.</p><p>Replay telemetry missing for refresh token rotation.</p></div>
+                <div class="detail-section"><h4>Attack Simulations</h4><p>OAuth provider error reflection reproduced tenant hints across retry branch.</p></div>
+                <div class="detail-section"><h4>Recommendations</h4><p>Normalize provider errors, emit replay attempts to audit-log, and add verifier expiry regression tests.</p></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="content view" id="settings">
+          <div class="hero"><div><p class="eyebrow">Settings</p><h2>Workspace controls</h2><p class="sub">Visual placeholder for provider connections, alert routing, and API base URL configuration.</p></div></div>
+          <div class="card"><div class="card-h"><h3>Backend connection</h3></div><div class="card-c"><p class="sub">Configure repository providers, API base URL, and notification routing when the backend exists.</p></div></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="drawer" id="drawer">
+      <div class="panel">
+        <div class="panel-head"><div><span class="badge critical">critical</span> <span class="badge medium">fintech-core</span><h3>#482 Harden token exchange flow</h3></div><button class="close" onclick="closeDrawer()">×</button></div>
+        <div class="panel-body">
+          <div class="detail-section"><h4>Changed Files</h4><p>src/auth/tokenExchange.ts</p><p>src/middleware/session.ts</p><p>tests/auth/tokenExchange.spec.ts</p></div>
+          <div class="detail-section"><h4>Summary</h4><p>OAuth token exchange validates PKCE challenges, but one retry branch can disclose provider error bodies.</p></div>
+          <div class="detail-section"><h4>Security Findings</h4><p>Provider error body returned to client.</p><p>Refresh token rotation lacks replay telemetry.</p></div>
+          <div class="detail-section"><h4>Attack Simulation</h4><p>Simulated OAuth error reflection reproduced tenant hint exposure in 2 of 5 retry paths.</p></div>
+          <button class="btn primary" style="width:100%;justify-content:center;margin-top:12px">Download Report</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="notify" id="notify">
+      <div class="panel small">
+        <div class="panel-head"><div><h3>Notifications</h3><p class="sub" style="margin:4px 0 0">Agent activity and review events</p></div><button class="close" onclick="toggleNotify()">×</button></div>
+        <div class="panel-body timeline">
+          <div class="event"><span class="badge good">Review completed</span><p>#482 finished with 2 high-risk findings.</p></div>
+          <div class="event"><span class="badge critical">Critical finding</span><p>Hardcoded provider secret detected in diff.</p></div>
+          <div class="event"><span class="badge high">Dependency issue</span><p>jsonwebtoken requires security patch review.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const buttons = document.querySelectorAll("[data-view-button]");
+      const views = document.querySelectorAll(".view");
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          buttons.forEach((item) => item.classList.remove("active"));
+          views.forEach((item) => item.classList.remove("active"));
+          button.classList.add("active");
+          document.getElementById(button.dataset.viewButton).classList.add("active");
+        });
+      });
+      function openDrawer() { document.getElementById("drawer").classList.add("open"); }
+      function closeDrawer() { document.getElementById("drawer").classList.remove("open"); }
+      function toggleNotify() { document.getElementById("notify").classList.toggle("open"); }
+    </script>
+  </body>
+</html>
