@@ -3,11 +3,12 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppLayout } from "./layouts/app-layout";
 import { useAuth } from "./context/auth-context";
 
+import AuthPage from "./pages/auth-page";
+
 const DashboardPage = lazy(() => import("./pages/dashboard-page"));
 const ReportsPage = lazy(() => import("./pages/reports-page"));
 const SettingsPage = lazy(() => import("./pages/settings-page"));
 const NotFoundPage = lazy(() => import("./pages/not-found-page"));
-const AuthPage = lazy(() => import("./pages/auth-page"));
 
 function RouteFallback() {
   return (

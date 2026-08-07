@@ -25,15 +25,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // On mount, restore session from localStorage
+  // On mount, restore session from localStorage with a 3s timeout to prevent UI freezes
   useEffect(() => {
     const storedToken = localStorage.getItem("auth_token");
     if (storedToken) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
       fetch(`${API}/api/auth/me`, {
         headers: { 
           Authorization: `Bearer ${storedToken}`,
           "bypass-tunnel-reminder": "true" 
         },
+        signal: controller.signal,
       })
         .then((r) => r.json())
         .then((data) => {
@@ -44,8 +48,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.removeItem("auth_token");
           }
         })
-        .catch(() => localStorage.removeItem("auth_token"))
-        .finally(() => setIsLoading(false));
+        .catch(() => {
+          // If token verification times out or fails, clear invalid session
+          console.warn("[Auth] Session validation timed out or failed.");
+          localStorage.removeItem("auth_token");
+        })
+        .finally(() => {
+          clearTimeout(timeoutId);
+          setIsLoading(false);
+        });
     } else {
       setIsLoading(false);
     }
