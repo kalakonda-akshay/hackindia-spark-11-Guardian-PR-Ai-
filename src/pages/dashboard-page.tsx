@@ -34,7 +34,10 @@ export default function DashboardPage() {
       const apiUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
       const res = await fetch(`${apiUrl}/api/analyze`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "bypass-tunnel-reminder": "true"
+        },
         body: JSON.stringify({ url: prUrl })
       });
       if (res.ok) {

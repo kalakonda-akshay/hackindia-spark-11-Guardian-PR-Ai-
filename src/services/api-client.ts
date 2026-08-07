@@ -10,6 +10,7 @@ export async function requestOrMock<T>(path: string, mockFactory: () => T | Prom
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
       Accept: "application/json",
+      "bypass-tunnel-reminder": "true",
     },
   });
 
@@ -36,6 +37,7 @@ export async function postOrMock<T>(
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
+      "bypass-tunnel-reminder": "true",
     },
     body: JSON.stringify(body),
   });

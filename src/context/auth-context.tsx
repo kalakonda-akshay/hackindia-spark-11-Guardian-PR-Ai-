@@ -30,7 +30,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedToken = localStorage.getItem("auth_token");
     if (storedToken) {
       fetch(`${API}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${storedToken}` },
+        headers: { 
+          Authorization: `Bearer ${storedToken}`,
+          "bypass-tunnel-reminder": "true" 
+        },
       })
         .then((r) => r.json())
         .then((data) => {
@@ -51,7 +54,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const res = await fetch(`${API}/api/auth/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "bypass-tunnel-reminder": "true"
+      },
       body: JSON.stringify({ email, password }),
     });
     const data = await res.json();
@@ -64,7 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (name: string, email: string, password: string) => {
     const res = await fetch(`${API}/api/auth/register`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "bypass-tunnel-reminder": "true"
+      },
       body: JSON.stringify({ name, email, password }),
     });
     const data = await res.json();
