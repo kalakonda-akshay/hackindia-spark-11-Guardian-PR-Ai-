@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mutagent - Master Technical Presentation Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030712;
+      --card-bg: rgba(15, 23, 42, 0.78);
+      --card-border: rgba(56, 189, 248, 0.18);
+      --primary: #0ea5e9;
+      --primary-glow: rgba(14, 165, 233, 0.4);
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.4);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.4);
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1, h2, h3, .brand-title {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    code, .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Ambient Dynamic Animated Background */
+    .bg-canvas {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.8;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.35;
+      animation: orbFloat 14s infinite ease-in-out alternate;
+    }
+
+    .orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, #0ea5e9 0%, transparent 70%);
+      top: -200px; left: -100px;
+    }
+
+    .orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      bottom: -150px; right: -100px;
+      animation-delay: -5s;
+    }
+
+    .orb-3 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      top: 40%; left: 40%;
+      animation-delay: -10s;
+    }
+
+    @keyframes orbFloat {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(40px, -50px) scale(1.1); }
+      100% { transform: translate(-30px, 30px) scale(0.95); }
+    }
+
+    /* Top Progress Bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      z-index: 100;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 10%;
+      background: linear-gradient(90deg, var(--primary), var(--accent), var(--emerald));
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    /* Slide Deck Container */
+    .deck-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1200px;
+      height: 680px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 2.2rem 3rem;
+      backdrop-filter: blur(24px);
+      box-shadow: 
+        0 30px 60px -12px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    /* Staggered Element Entry Animations */
+    .slide.active .anim-1 { animation: slideUpFade 0.5s ease-out forwards; animation-delay: 0.1s; opacity: 0; }
+    .slide.active .anim-2 { animation: slideUpFade 0.5s ease-out forwards; animation-delay: 0.2s; opacity: 0; }
+    .slide.active .anim-3 { animation: slideUpFade 0.5s ease-out forwards; animation-delay: 0.3s; opacity: 0; }
+    .slide.active .anim-4 { animation: slideUpFade 0.5s ease-out forwards; animation-delay: 0.4s; opacity: 0; }
+
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header Styling */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.8rem;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      background: rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .live-dot {
+      width: 7px; height: 7px;
+      background: var(--emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--emerald);
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.4; }
+    }
+
+    .slide-title {
+      font-size: 2.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    /* Layout Grids */
+    .slide-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.8rem;
+      align-items: center;
+      margin: 1rem 0;
+    }
+
+    .full-width { grid-template-columns: 1fr; }
+
+    /* Bullet Lists */
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.95rem;
+    }
+
+    .bullet-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0.9rem 1.1rem;
+      border-radius: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .bullet-item:hover {
+      background: rgba(14, 165, 233, 0.06);
+      border-color: rgba(14, 165, 233, 0.3);
+      transform: translateX(6px);
+    }
+
+    .bullet-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .bullet-content h4 {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 0.2rem;
+    }
+
+    .bullet-content p {
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* Dynamic Visual Cards */
+    .visual-card {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.4rem;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .glow-card-primary {
+      border-color: rgba(14, 165, 233, 0.4);
+      box-shadow: 0 0 30px rgba(14, 165, 233, 0.15);
+    }
+
+    .glow-card-accent {
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+    }
+
+    /* Agent Pipeline Grid */
+    .agent-pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+    }
+
+    .agent-node {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 0.85rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .agent-node:hover {
+      background: rgba(14, 165, 233, 0.1);
+      border-color: var(--primary);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(14, 165, 233, 0.2);
+    }
+
+    .agent-node-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .agent-node-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .agent-node-desc {
+      font-size: 0.74rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    /* Tech Table */
+    .tech-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .tech-table th, .tech-table td {
+      border: 1px solid var(--card-border);
+      padding: 0.65rem 0.9rem;
+      text-align: left;
+    }
+    .tech-table th { background: rgba(14, 165, 233, 0.15); color: var(--primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .tech-table td { color: #cbd5e1; }
+
+    /* Code Snippet Box */
+    .code-box {
+      background: #090d16;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 1rem;
+      font-size: 0.82rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+
+    .code-highlight {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fda4af;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .code-fix {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* Speaker Notes Bar */
+    .speaker-notes-bar {
+      background: rgba(14, 165, 233, 0.08);
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      border-left: 4px solid var(--primary);
+      padding: 0.65rem 1.2rem;
+      border-radius: 0 10px 10px 0;
+      font-size: 0.81rem;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .notes-label {
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      font-size: 0.74rem;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    /* Footer Controls */
+    .footer-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 3rem 1.5rem;
+      position: relative;
+      z-index: 50;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.4rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .slide-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .dot-step {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dot-step.active {
+      width: 24px;
+      border-radius: 99px;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Orbs & Grid -->
+  <div class="bg-canvas">
+    <div class="bg-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Top Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" id="progressBar"></div>
+  </div>
+
+  <!-- Main Slide Deck Container -->
+  <div class="deck-container">
+
+    <!-- SLIDE 1: Title Slide -->
+    <div class="slide active">
+      <div class="slide-header">
+        <span class="badge-pill"><span class="live-dot"></span> HackIndia Spark 11 Pitch</span>
+        <span class="slide-number text-xs text-muted" id="slideNum">01 / 11</span>
+      </div>
+      
+      <div class="slide-body full-width" style="text-align: center; margin: 1.5rem 0;">
+        <div class="anim-1">
+          <span style="font-size: 3rem; line-height: 1;">🛡️</span>
+          <h1 style="font-size: 3.8rem; font-weight: 800; margin-top: 0.3rem; background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Mutagent</h1>
+          <p style="font-size: 1.35rem; color: var(--muted); max-width: 720px; margin: 0.6rem auto 1.8rem; font-weight: 500;">
+            Autonomous Multi-Agent AI Security Reviewer for Zero-Trust Code Pipelines
+          </p>
+        </div>
+
+        <div class="anim-2" style="display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap;">
+          <div class="badge-pill" style="padding: 0.6rem 1.2rem; font-size: 0.85rem;">⚡ Instant SAST & CVE Audits</div>
+          <div class="badge-pill" style="padding: 0.6rem 1.2rem; font-size: 0.85rem; border-color: rgba(99,102,241,0.4); color: #818cf8;">🤖 7-Agent AI Engine</div>
+          <div class="badge-pill" style="padding: 0.6rem 1.2rem; font-size: 0.85rem; border-color: rgba(16,185,129,0.4); color: #34d399;">🔗 Live Webhook PR Comments</div>
+        </div>
+      </div>
+
+      <div class="speaker-notes-bar anim-3">
+        <span class="notes-label">🗣️ Speaker Script:</span>
+        <span>"Good morning judges! Today we are introducing Mutagent — an autonomous multi-agent AI security reviewer that acts as a 24/7 senior application security engineer directly integrated into your GitHub pipeline."</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Problem Statement -->
+    <div class="slide">
+      <div class="slide-header">
+        <span class="badge-pill">The Challenge</span>
+        <h2 class="slide-title">PR Security is a Critical Bottleneck</h2>
+      </div>
+
+      <div class="slide-body">
+        <div class="bullet-list anim-1">
+          <div class="bullet-item">
+            <span class="bullet-icon">⏳</span>
+            <div class="bullet-content">
+              <h4>Slow Deployment Cycles</h4>
+              <p>Pull Requests sit idle for days waiting for security team sign-offs.</p>
+            </div>
+          </div>
+          <div class="bullet-item">
+            <span class="bullet-icon">🙈</span>
+            <div class="bullet-content">
+              <h4>Human Oversight & Vulnerabilities</h4>
+              <p>Reviewers miss SQL injections, XSS, exposed secrets, and unverified JWTs.</p>
+            </div>
+          </div>
+          <div class="bullet-item">
+            <span class="bullet-icon">📦</span>
+            <div class="bullet-content">
+              <h4>Supply Chain & Transitive Risks</h4>
+              <p>Indirect package dependencies introduce known CVE vulnerabilities into production.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="visual-card glow-card-accent anim-2" style="text-align: center; padding: 2rem;">
+          <span style="font-size: 2.5rem;">🚨</span>
+          <h3 style="color: var(--rose); font-size: 1.4rem; margin: 0.5rem 0;">The Security Dilemma</h3>
+          <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.6;">
+            Software teams are currently forced to choose between <strong>shipping code fast</strong> or <strong>shipping code securely</strong>.
+          </p>
+        </div>
+      </div>
+
+      <div class="speaker-notes-bar anim-3">
+        <span class="notes-label">🗣️ Speaker Script:</span>
+        <span>"Software moves fast, but security reviews lag behind. Human reviewers get tired, legacy tools output hundreds of noisy alerts, and dangerous vulnerabilities slip into production."</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: The Solution -->
+    <div class="slide">
+      <div class="slide-header">
+        <span class="badge-pill" style="border-color: rgba(16,185,129,0.4); color: var(--emerald);">The Solution</span>
+        <h2 class="slide-title">Mutagent Autonomous Platform</h2>
+      </div>
+
+      <div class="slide-body">
+        <div class="bullet-list anim-1">
+          <div class="bullet-item">
+            <span class="bullet-icon">🤖</span>
+            <div class="bullet-content">
+              <h4>7 Specialized AI Micro-Agents</h4>
+              <p>Distributed review pipeline handling Triage, SAST, CVEs, Memory, and Reporting.</p>
+            </div>
+          </div>
+          <div class="bullet-item">
+            <span class="bullet-icon">🔗</span>
+            <div class="bullet-content">
+              <h4>Zero-Click Webhook Automation</h4>
+              <p>Listens to GitHub PR events and automatically posts markdown fix reports.</p>
+            </div>
+          </div>
+          <div class="bullet-item">
+            <span class="bullet-icon">🔐</span>
+            <div class="bullet-content">
+              <h4>Zero-Trust Auth & In-Memory Fallback</h4>
+              <p>Full JWT authentication + automatic MongoMemoryServer fallback for 100% demo uptime.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="visual-card glow-card-primary anim-2">
+          <h4 style="color: var(--primary); margin-bottom: 1rem;">⚡ Platform High-Tech Features</h4>
+          <div class="agent-pipeline-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="agent-node">
+              <div class="agent-node-name">HMAC SHA-256</div>
+              <div class="agent-node-desc">50ms Webhook validation</div>
+            </div>
+            <div class="agent-node">
+              <div class="agent-node-name">Posture Gauge</div>
+              <div class="agent-node-desc">Real-time 0-100 score</div>
+            </div>
+            <div class="agent-node">
+              <div class="agent-node-name">Code Patching</div>
+              <div class="agent-node-desc">Exact line-number fixes</div>
+            </div>
+            <div class="agent-node">
+              <div class="agent-node-name">Compliance PDF</div>
+              <div class="agent-node-desc">One-click audit export</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="speaker-notes-bar anim-3">
+        <span class="notes-label">🗣️ Speaker Script:</span>
+        <span>"Mutagent solves this by deploying seven specialized AI agents that analyze PR code diffs within seconds, score security risk, and post clear code patches right on your GitHub PR."</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: The 7 AI Agents Overview -->
+    <div class="slide">
+      <div class="slide-header">
+        <span class="badge-pill">AI Engine</span>
+        <h2 class="slide-title">The 7-Agent Autonomous Pipeline</h2>
+      </div>
+
+      <div class="slide-body full-width">
+        <div class="agent-pipeline-grid anim-1">
+          <div class="agent-node">
+            <div class="agent-node-icon">🎯</div>
+            <div class="agent-node-name">1. Triage Agent</div>
+            <div class="agent-node-desc">Classifies file risk & auth paths.</div>
+          </div>
+          <div class="agent-node">
+            <div class="agent-node-icon">🔍</div>
+            <div class="agent-node-name">2. Context Agent</div>
+            <div class="agent-node-desc">Parses raw code diffs & commits.</div>
+          </div>
+          <div class="agent-node">
+            <div class="agent-node-icon">🔒</div>
+            <div class="agent-node-name">3. Security Agent</div>
+            <div class="agent-node-desc">Audits OWASP Top 10 SAST issues.</div>
+          </div>
+          <div class="agent-node">
+            <div class="agent-node-icon">📦</div>
+            <div class="agent-node-name">4. Dependency Agent</div>
+            <div class="agent-node-desc">Checks package CVE registries.</div>
+          </div>
+          <div class="agent-node">
+            <div class="agent-node-icon">🧠</div>
+            <div class="agent-node-name">5. Memory Agent</div>
+            <div class="agent-node-desc">Cross-references historical flaws.</div>
+          </div>
+          <div class="agent-node">
+            <div class="agent-node-icon">📝</div>
+            <div class="agent-node-name">6. Reporter Agent</div>
+            <div class="agent-node-desc">Formats PR Markdown reports.</div>
+          </div>
+          <div class="agent-node" style="grid-column: span 2; border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.06);">
+            <div class="agent-node-icon">📊</div>
+            <div class="agent-node-name" style="color: var(--emerald);">7. Evaluator Agent</div>
+            <div class="agent-node-desc">Audits review accuracy, validates findings, and minimizes false positives before publishing.</div>
+          </div>
+        </div>
+
+        <div class="code-box anim-2" style="margin-top: 1.2rem;">
+          <span style="color: var(--muted);">// Example SAST Vulnerability Detection Output</span><br>
+          <span class="code-highlight">🚨 CRITICAL VULNERABILITY: SQL Injection in src/auth.ts (Line 42)</span><br>
+          <span class="code-fix">✅ RECOMMENDED FIX: Use parameterized query `db.query('SELECT * FROM users WHERE id = ?', [userId])`</span>
+        </div>
+      </div>
+
+      <div class="speaker-notes-bar anim-3">
+        <span class="notes-label">🗣️ Speaker Script:</span>
+        <span>"Rather than relying on one mega-prompt, we split the audit into seven focused micro-agents. This modular design drastically increases accuracy and eliminates hallucinations."</span>
+      </div>
+    </div>
+
+    <!-- NEW SLIDE 5: Brief Work Breakdown of Each Agent -->
+    <div class="slide">
+      <div class="slide-header">
+        <span class="badge-pill" style="border-color: rgba(99,102,241,0.4); color: #818cf8;">Deep-Dive</span>
+        <h2 class="slide-title">Agent Roles & Work Breakdown</h2>
+      </div>
+
+      <div class="slide-body full-width">
+        <div class="agent-pipeline-grid anim-1" style="grid-template-columns: 1fr 1fr;">
+          <div class="bullet-item">
+            <span class="bullet-icon">🎯</span>
+            <div class="bullet-content">
+              <h4>1. Triage Agent (Priority & Scope)</h4>
+              <p>Scans changed file paths to flag high-security risk targets (e.g. `auth.ts`, `db.js`, `.env`) and prioritizes execution scope.</p>
+            </div>
+          </div>
+
+          <div class="bullet-item">
+            <span class="bullet-icon">🔍</span>
+            <div class="bullet-content">
+              <h4>2. Context Agent (Diff Extraction)</h4>
+              <p>Extracts raw unified code diffs (`diff --git`), modified AST functions, commit history, and author metadata.</p>
+            </div>
+          </div>
+
+          <div class="bullet-item">
+            <span class="bullet-icon">🔒</span>
+            <div class="bullet-content">
+              <h4>3. Security Agent (SAST Analysis)</h4>
+              <p>Performs deep prompt audits using Gemini AI to detect OWASP Top 10 flaws, hardcoded secrets, SQLi, and XSS.</p>
+            </div>
+          </div>
+
+          <div class="bullet-item">
+            <span class="bullet-icon">📦</span>
+            <div class="bullet-content">
+              <h4>4. Dependency Agent (Supply Chain CVEs)</h4>
+              <p>Scans package manifests (`package.json`, `requirements.txt`) to identify vulnerable or outdated 3rd-party dependencies.</p>
+            </div>
+          </div>
+
+          <div class="bullet-item">
+            <span class="bullet-icon">🧠</span>
+            <div class="bullet-content">
+              <h4>5. Memory Agent (Historical Flaws)</h4>
+              <p>Cross-references historical session memory to check if similar security bugs were previously flagged or fixed.</p>
+            </div>
+          </div>
+
+          <div class="bullet-item">
+            <span class="bullet-icon">📝</span>
+            <div class="bullet-content">
+              <h4>6. Reporter Agent (Report Synthesis)</h4>
+              <p>Calculates the 0-100 overall Security Risk Score, formats line-by-line fix recommendations, and posts GitHub Markdown comments.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="speaker-notes-bar anim-2">
+        <span class="notes-label">🗣️ Speaker Script:</span>
+        <span>"Each agent has a single, strictly defined responsibility — from initial file triage to deep SAST scanning, dependency CVE lookup, and final report synthesis."</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Security & Cryptography -->
+    <div class="slide">
+      <div class="slide-header">
+        <span class="badge-pill">Zero-Trust Security</span>
+        <h2 class="slide-title">Cryptographic Integrity & Auth Architecture</h2>
+      </div>
+
+      <div class="slide-body full-width">
+        <div class="agent-pipeline-grid anim-1" style="grid-template-columns: 1fr 1fr;">
+          <div class="bullet-item">
+            <span class="bullet-icon">🔑</span>
+            <div class="bullet-content">
+              <h4>HMAC SHA-256 Signature Verification</h4>
+              <p>Calculates HMAC hashes over raw HTTP bodies using a shared secret to ensure webhooks originate exclusively from GitHub.</p>
+            </div>
+          </div>
+
+          <div class="bullet-item">
+            <span class="bullet-icon">🎟️</span>
+            <div class="bullet-content">
+              <h4>Stateless JWT User Authentication</h4>
+              <p>Issues 7-day signed JSON Web Tokens for API authorization, validated via `Authorization: Bearer` headers.</p>
+            </div>
+          </div>
+
+          <div class="bullet-item">
+            <span class="bullet-icon">🧂</span>
+            <div class="bullet-content">
+              <h4>Password Salting & Bcrypt Hashing</h4>
+              <p>Uses `bcryptjs` with 10 salt rounds before storing credentials to eliminate rainbow table attack risks.</p>
+            </div>
+          </div>
+
+          <div class="bullet-item">
+            <span class="bullet-icon">🛡️</span>
+            <div class="bullet-content">
+              <h4>OWASP Top 10 SAST Engine</h4>
+              <p>Detects SQL injections, Cross-Site Scripting (XSS), insecure deserialization, and plain secret exposures.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="speaker-notes-bar anim-2">
+        <span class="notes-label">🗣️ Speaker Script:</span>
+        <span>"Security is built into Mutagent itself. Webhooks are HMAC SHA-256 verified, user sessions use 7-day JWT tokens, and all passwords are salted and hashed with Bcrypt."</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Technology Stack Matrix -->
+    <div class="slide">
+      <div class="slide-header">
+        <span class="badge-pill">Engineering Matrix</span>
+        <h2 class="slide-title">Full-Stack Rationale & Frameworks</h2>
+      </div>
+
+      <div class="slide-body full-width">
+        <table class="tech-table anim-1">
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>Technologies</th>
+              <th>Technical Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Frontend</strong></td>
+              <td>React 18, Vite, TailwindCSS, TanStack Query, jsPDF</td>
+              <td>Instant HMR, client-side caching, stale-while-revalidate data fetching & PDF exports.</td>
+            </tr>
+            <tr>
+              <td><strong>Backend</strong></td>
+              <td>Node.js (ESM), Express.js, TypeScript, Octokit</td>
+              <td>End-to-end type safety, native ESM execution, and official GitHub API client integration.</td>
+            </tr>
+            <tr>
+              <td><strong>Real-Time</strong></td>
+              <td>Socket.IO (Client & Server)</td>
+              <td>Bi-directional streaming of live agent execution events without manual polling.</td>
+            </tr>
+            <tr>
+              <td><strong>AI Engine</strong></td>
+              <td>Google Gemini 1.5 Flash API (@google/genai)</td>
+              <td>Sub-second LLM inference for code diff comprehension & threat scoring.</td>
+            </tr>
+            <tr>
+              <td><strong>Database</strong></td>
+              <td>Mongoose + MongoMemoryServer Fallback</td>
+              <td>Production schema modeling with zero-downtime RAM fallback if cloud database drops.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="speaker-notes-bar anim-2">
+        <span class="notes-label">🗣️ Speaker Script:</span>
+        <span>"We selected a high-performance stack: React 18 & Vite on the frontend, Node TypeScript ESM on the backend, Google Gemini for fast LLM inference, and Socket.IO for live websocket streaming."</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: High Availability -->
+    <div class="slide">
+      <div class="slide-header">
+        <span class="badge-pill">Resilience Engineering</span>
+        <h2 class="slide-title">High-Availability & Fallback Architecture</h2>
+      </div>
+
+      <div class="slide-body">
+        <div class="bullet-list anim-1">
+          <div class="bullet-item">
+            <span class="bullet-icon">🔄</span>
+            <div class="bullet-content">
+              <h4>In-Memory Database Fallback</h4>
+              <p>Automatically switches to `MongoMemoryServer` if cloud MongoDB credentials buffer or fail.</p>
+            </div>
+          </div>
+          <div class="bullet-item">
+            <span class="bullet-icon">⏱️</span>
+            <div class="bullet-content">
+              <h4>Fast Webhook Acknowledgment</h4>
+              <p>Returns HTTP 202 Accepted within 50ms to strictly comply with GitHub 3-second timeout rules.</p>
+            </div>
+          </div>
+          <div class="bullet-item">
+            <span class="bullet-icon">🛡️</span>
+            <div class="bullet-content">
+              <h4>Session AbortController Guard</h4>
+              <p>3-second timeout guard on token verification to prevent UI freezes on remote deployments.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="visual-card glow-card-accent anim-2" style="text-align: center; padding: 2rem;">
+          <span style="font-size: 2.2rem;">✅</span>
+          <h3 style="color: var(--emerald); font-size: 1.3rem; margin: 0.5rem 0;">Zero-Downtime Guarantee</h3>
+          <p style="color: var(--muted); font-size: 0.92rem;">
+            Guarantees 100% demo availability under any network or cloud database constraint.
+          </p>
+        </div>
+      </div>
+
+      <div class="speaker-notes-bar anim-3">
+        <span class="notes-label">🗣️ Speaker Script:</span>
+        <span>"To ensure 100% uptime, we engineered an in-memory database fallback and fetch abort controllers. If cloud connections drop, Mutagent continues running seamlessly without losing session state."</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Technical Glossary -->
+    <div class="slide">
+      <div class="slide-header">
+        <span class="badge-pill">Technical Concepts</span>
+        <h2 class="slide-title">Technical Terms & Buzzwords Glossary</h2>
+      </div>
+
+      <div class="slide-body full-width">
+        <div class="agent-pipeline-grid anim-1" style="grid-template-columns: 1fr 1fr;">
+          <div class="bullet-item">
+            <span class="bullet-icon">🤖</span>
+            <div class="bullet-content">
+              <h4>Agentic AI & Pub/Sub</h4>
+              <p>Autonomous AI micro-services communicating via an event-driven publish/subscribe message bus (`MessageBus`).</p>
+            </div>
+          </div>
+          <div class="bullet-item">
+            <span class="bullet-icon">⚡</span>
+            <div class="bullet-content">
+              <h4>WebSockets & Bi-Directional Streaming</h4>
+              <p>Persistent TCP connection (`Socket.IO`) allowing the server to push state updates (`status_update`) to client UIs instantly.</p>
+            </div>
+          </div>
+          <div class="bullet-item">
+            <span class="bullet-icon">📦</span>
+            <div class="bullet-content">
+              <h4>Transitive CVE Scanning</h4>
+              <p>Auditing 3rd and 4th level indirect dependencies in `package.json` against known vulnerability registries.</p>
+            </div>
+          </div>
+          <div class="bullet-item">
+            <span class="bullet-icon">🔄</span>
+            <div class="bullet-content">
+              <h4>Stale-While-Revalidate (SWR)</h4>
+              <p>Data caching strategy via React Query that renders cached UI instantly while refetching updated data in the background.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="speaker-notes-bar anim-2">
+        <span class="notes-label">🗣️ Speaker Script:</span>
+        <span>"Mutagent uses event-driven pub/sub agent communication, bi-directional socket streaming, transitive CVE resolution, and SWR caching for instant UI response."</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Future Roadmap -->
+    <div class="slide">
+      <div class="slide-header">
+        <span class="badge-pill">Future Expansion</span>
+        <h2 class="slide-title">Platform Scaling Roadmap</h2>
+      </div>
+
+      <div class="slide-body full-width">
+        <div class="agent-pipeline-grid anim-1" style="grid-template-columns: 1fr 1fr 1fr;">
+          <div class="feature-card" style="border-color: var(--primary);">
+            <h4 style="color: var(--primary);">Phase 1: Present (Live)</h4>
+            <p style="margin-top: 0.4rem;">• 7-Agent AI Engine<br>• Live GitHub Webhooks<br>• Full JWT Auth & Bcrypt<br>• Command Center & PDF Export</p>
+          </div>
+          <div class="feature-card" style="border-color: var(--accent);">
+            <h4 style="color: var(--accent);">Phase 2: Next</h4>
+            <p style="margin-top: 0.4rem;">• One-click GitHub ` ```suggestion ` PR inline patches<br>• Slack & Discord webhook alerts<br>• Automated fix branch creation</p>
+          </div>
+          <div class="feature-card" style="border-color: var(--emerald);">
+            <h4 style="color: var(--emerald);">Phase 3: Enterprise</h4>
+            <p style="margin-top: 0.4rem;">• Vector DB (Pinecone) code memory<br>• VS Code & Cursor IDE extensions<br>• Automated SOC 2 / HIPAA compliance audits</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="speaker-notes-bar anim-2">
+        <span class="notes-label">🗣️ Speaker Script:</span>
+        <span>"Moving forward, we are expanding Mutagent to support one-click inline code suggestions, Slack alerts, and an official VS Code extension so developers get security feedback before even pushing code."</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: Conclusion & Live Access -->
+    <div class="slide">
+      <div class="slide-header">
+        <span class="badge-pill" style="border-color: rgba(16,185,129,0.4); color: var(--emerald);">Live Deployment</span>
+        <h2 class="slide-title">Try Mutagent Live Today</h2>
+      </div>
+
+      <div class="slide-body full-width" style="text-align: center;">
+        <div class="anim-1">
+          <span style="font-size: 3rem;">🚀</span>
+          <h3 style="font-size: 2.2rem; color: #fff; margin: 0.5rem 0;">Production Deployed & Active</h3>
+          
+          <div class="visual-card glow-card-primary" style="max-width: 680px; margin: 1rem auto; padding: 1.5rem;">
+            <p class="code-font" style="font-size: 1.25rem; color: var(--primary);">https://mutagent-ui.vercel.app</p>
+            <p style="font-size: 0.95rem; color: var(--muted); margin-top: 0.6rem;">
+              <strong>GitHub Repository:</strong> github.com/kalakonda-akshay/hackindia-spark-11-Guardian-PR-Ai-
+            </p>
+          </div>
+
+          <p style="font-size: 1.15rem; color: #cbd5e1; margin-top: 1rem;">
+            Thank you judges! We are ready for live demonstration and Q&A.
+          </p>
+        </div>
+      </div>
+
+      <div class="speaker-notes-bar anim-2">
+        <span class="notes-label">🗣️ Speaker Script:</span>
+        <span>"Mutagent makes PR security instant, autonomous, and developer-friendly. Thank you! We are now open for your questions and live demonstration."</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer Controls -->
+  <div class="footer-controls">
+    <button class="nav-btn" id="prevBtn">← Previous</button>
+    <div class="slide-indicator" id="slideDots"></div>
+    <button class="nav-btn" id="nextBtn">Next →</button>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const slideDotsContainer = document.getElementById('slideDots');
+    const slideNum = document.getElementById('slideNum');
+    let currentSlide = 0;
+
+    // Create Navigation Dots dynamically for all 11 slides
+    slides.forEach((_, idx) => {
+      const dot = document.createElement('div');
+      dot.className = `dot-step ${idx === 0 ? 'active' : ''}`;
+      dot.addEventListener('click', () => goToSlide(idx));
+      slideDotsContainer.appendChild(dot);
+    });
+
+    const dots = document.querySelectorAll('.dot-step');
+
+    function updateDeck() {
+      slides.forEach((slide, idx) => {
+        slide.classList.toggle('active', idx === currentSlide);
+      });
+
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === currentSlide);
+      });
+
+      // Update progress bar
+      const progress = ((currentSlide + 1) / slides.length) * 100;
+      progressBar.style.width = `${progress}%`;
+      
+      if (slideNum) {
+        const formattedIndex = (currentSlide + 1).toString().padStart(2, '0');
+        const formattedTotal = slides.length.toString().padStart(2, '0');
+        slideNum.textContent = `${formattedIndex} / ${formattedTotal}`;
+      }
+    }
+
+    function goToSlide(index) {
+      currentSlide = index;
+      updateDeck();
+    }
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentSlide > 0) { currentSlide--; updateDeck(); }
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (currentSlide < slides.length - 1) { currentSlide++; updateDeck(); }
+    });
+
+    // Keyboard Shortcuts (Arrow keys, Spacebar, F for Fullscreen)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Space') {
+        if (currentSlide < slides.length - 1) { currentSlide++; updateDeck(); }
+      } else if (e.key === 'ArrowLeft') {
+        if (currentSlide > 0) { currentSlide--; updateDeck(); }
+      } else if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
+    });
+
+    updateDeck();
+  </script>
+</body>
+</html>
